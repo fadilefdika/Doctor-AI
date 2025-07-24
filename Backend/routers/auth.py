@@ -28,19 +28,17 @@ def register(auth: AuthRequest):
 
 
 @router.post("/login")
-def login(auth: LoginRequest):
+def login(auth: AuthRequest):
     result = login_user(auth.email, auth.password)
 
-    if result.get("error"):
+    # Jika error, raise HTTPException agar frontend dapat 400 dan pesan
+    if "error" in result:
         raise HTTPException(status_code=400, detail=result["error"])
 
     return {
-        "message": "Login successful",
         "access_token": result["access_token"],
-        "token_type": "bearer",
-        "user": result["user"]["email"]
+        "user": result["user"]["email"]  # ini dict, bukan objek
     }
-
 
 
 @router.get("/profile")
