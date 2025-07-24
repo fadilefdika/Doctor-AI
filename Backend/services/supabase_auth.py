@@ -30,17 +30,14 @@ def login_user(email: str, password: str):
         "email": email,
         "password": password
     })
-    return response
 
+    if not response.session:
+        raise Exception("Login failed or session not returned.")
 
-if __name__ == "__main__":
-    test_email = "testuser@example.com"
-    test_password = "TestPassword123"
+    access_token = response.session.access_token
+    user = response.user
 
-    print("🔧 Testing Register...")
-    register_response = register_user(test_email, test_password)
-    print(register_response)
-
-    print("\n🔐 Testing Login...")
-    login_response = login_user(test_email, test_password)
-    print(login_response)
+    return {
+        "user": user,
+        "access_token": access_token
+    }

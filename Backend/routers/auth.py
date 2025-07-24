@@ -25,12 +25,12 @@ def register(auth: AuthRequest):
 def login(auth: AuthRequest):
     result = login_user(auth.email, auth.password)
 
-    # Aman: cek kalau `result` ada, dan punya atribut `error`
-    if result and getattr(result, "error", None):
-        raise HTTPException(status_code=400, detail=result.error.message)
+    if result.get("error"):
+        raise HTTPException(status_code=400, detail=result["error"])
 
     return {
         "message": "Login successful",
-        "user": result.user.email if result.user else None,
+        "access_token": result["access_token"],
+        "token_type": "bearer",
+        "user": result["user"].email
     }
-
