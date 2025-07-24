@@ -1,14 +1,58 @@
 import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, usePathname } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
+import Modal from 'react-native-modal';
 
 export default function Profile() {
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem('token');
+    await AsyncStorage.removeItem('username');
+    router.replace('/login');
+  }
+  const router = useRouter();
+
+  const [modal, setModal] = useState({
+    visible: false,
+    title: '',
+    message: '',
+  });
+
+  const showModal = (title: string, message: string) => {
+    setModal({ visible: true, title, message });
+  };
+
+  useEffect(() => {
+    const checkToken = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token');
+        if (!token) {
+          showModal('Session Expired', 'Please login again.');
+          setTimeout(() => {
+            setModal({ ...modal, visible: false });
+            router.replace('/login');
+          }, 1500);
+        }
+      } catch (err) {
+        showModal('Error', 'Failed to read token.');
+        setTimeout(() => {
+          setModal({ ...modal, visible: false });
+          router.replace('/login');
+        }, 1500);
+      }
+    };
+
+    checkToken();
+  }, []);
+
   return (
     <View style={styles.container}>
       {/* <Text style={styles.title}>Profil</Text> */}
 
       {/* Tombol Logout modern iOS-style */}
-      <TouchableOpacity style={styles.logoutBtn}>
+      <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
         <Ionicons name="log-out-outline" size={22} color="#fff" />
         <Text style={styles.logoutText}>Keluar</Text>
       </TouchableOpacity>
@@ -23,7 +67,7 @@ export default function Profile() {
           <Ionicons name="pricetag-outline" size={26} color="#3C84F5" />
           <Text style={styles.navText}>Produk</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/profile')}>
+        <TouchableOpacity style={styles.navItem}>
           <Ionicons name="person" size={26} color="#3C84F5" />
           <Text style={styles.navText}>Profile</Text>
         </TouchableOpacity>
@@ -46,7 +90,7 @@ const styles = StyleSheet.create({
     color: '#1E1E1E',
   },
   logoutBtn: {
-    marginTop:550,
+    marginTop: 550,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

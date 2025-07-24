@@ -7,16 +7,56 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  BackHandler,
 } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Modal from 'react-native-modal';
 
 export default function HomePage() {
+  const [modal, setModal] = useState({ visible: false, title: '', message: '' });
+
   const router = useRouter();
   const pathname = usePathname();
   const [input, setInput] = useState('');
   const [response, setResponse] = useState('');
+
+  const showModal = (title: string, message: string) => {
+    setModal({ visible: true, title, message });
+  };
+
+  useEffect(() => {
+    const checkToken = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token');
+        if (!token) {
+          showModal('Session Expired', 'Please login again.');
+          setTimeout(() => {
+            setModal({ ...modal, visible: false });
+            router.replace('/login');
+          }, 1500);
+        }
+      } catch (err) {
+        console.error('Token check failed:', err);
+        showModal('Error', 'Failed to read token.');
+        setTimeout(() => {
+          setModal({ ...modal, visible: false });
+          router.replace('/login');
+        }, 1500);
+      }
+    };
+
+    checkToken();
+
+    // Blok tombol back
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      return true; // Ini mencegah aksi kembali
+    });
+
+    return () => backHandler.remove(); // cleanup saat unmount
+  }, []);
 
   const handleSend = () => {
     if (input.trim()) {
@@ -47,7 +87,7 @@ export default function HomePage() {
           )}
         </ScrollView>
 
-        {/* Input Chat seperti ChatGPT */}
+        {/* Input Chat */}
         <View style={styles.chatInputWrapper}>
           <View style={styles.inputContainer}>
             <TextInput
@@ -67,7 +107,7 @@ export default function HomePage() {
 
       {/* Bottom Navbar */}
       <View style={styles.bottomNav}>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/home')}>
+        <TouchableOpacity style={styles.navItem}>
           <Ionicons
             name={pathname === '/home' ? 'home' : 'home-outline'}
             size={26}
@@ -92,6 +132,17 @@ export default function HomePage() {
           <Text style={styles.navText}>Profile</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Modal */}
+      <Modal isVisible={modal.visible}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>{modal.title}</Text>
+          <Text style={styles.modalMessage}>{modal.message}</Text>
+          <TouchableOpacity onPress={() => setModal({ ...modal, visible: false })}>
+            <Text style={styles.modalClose}>OK</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -137,6 +188,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   chatInputWrapper: {
+    marginBottom:80,
     paddingHorizontal: 16,
     paddingBottom: 80,
     backgroundColor: '#F9FAFB',
@@ -195,4 +247,26 @@ const styles = StyleSheet.create({
     color: '#3C84F5',
     marginTop: 2,
   },
+  modalContent: {
+  backgroundColor: 'white',
+  padding: 20,
+  borderRadius: 10,
+  alignItems: 'center',
+},
+modalTitle: {
+  fontSize: 18,
+  fontWeight: 'bold',
+  marginBottom: 10,
+},
+modalMessage: {
+  fontSize: 16,
+  textAlign: 'center',
+  marginBottom: 20,
+},
+modalClose: {
+  fontSize: 16,
+  color: '#3C84F5',
+  fontWeight: 'bold',
+},
+
 });
