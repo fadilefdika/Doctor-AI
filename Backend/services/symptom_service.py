@@ -14,10 +14,10 @@ def fetch_recent_symptoms(user_id: str) -> list[dict]:
         .eq("user_id", user_id) \
         .eq("role", "user") \
         .order("created_at", desc=True) \
-        .limit(3) \
         .execute()
 
     return response.data or []
+
 
 def save_symptom_summary(user_id: str, summary: str) -> None:
     supabase \
