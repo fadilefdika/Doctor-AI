@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from utils.LLM_utils import ask_llm
 
 app = FastAPI()
 
@@ -8,7 +9,8 @@ class ChatRequest(BaseModel):
 
 @app.post("/chat")
 def chat(request: ChatRequest):
-    return {"response": f"Kamu mengatakan: {request.message}"}
+    reply = ask_llm(request.message)
+    return {"response": reply}
 
 
 @app.get("/")
