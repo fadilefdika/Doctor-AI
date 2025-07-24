@@ -2,28 +2,38 @@ import uuid
 from pydantic import BaseModel
 from fastapi import APIRouter, Request, Depends, HTTPException
 from middleware.auth_guard import verify_token
-from services.symptom_service import fetch_recent_symptoms, save_symptom_summary, start_new_session
+from services.symptom_service import (
+    fetch_recent_symptoms,
+    save_symptom_summary,
+    start_new_session,
+    save_symptom_message
+)
 from services.openai_llm import ask_gpt
+
+router = APIRouter(prefix="/chat", tags=["chat"])
 
 class SummaryInput(BaseModel):
     session_id: str
 
 class SymptomInput(BaseModel):
     message: str
-    session_id: str  # tambahkan ini
-
-router = APIRouter(prefix="/chat", tags=["chat"])
+    session_id: str
 
 @router.post("/start-session")
 async def start_session(user: dict = Depends(verify_token)):
     user_id = user["sub"]
-    session_id = str(uuid.uuid4())  # generate session unik
-
-    # Simpan ke Supabase (opsional)
+    session_id = str(uuid.uuid4())
+    
+    # Simpan session ke tabel chat_sessions
     start_new_session(user_id, session_id)
 
     return {"message": "Sesi baru dimulai", "session_id": session_id}
 
+@router.post("/send")
+async def send_symptom(input: SymptomInput, user: dict = Depends(verify_token)):
+    user_id = user["sub"]
+    save_symptom_message(user_id, input.message, input.session_id)
+    return {"message": "Gejala berhasil disimpan"}
 
 @router.post("/summary")
 async def chat_summary(input: SummaryInput, request: Request, user: dict = Depends(verify_token)):
@@ -46,16 +56,3 @@ async def chat_summary(input: SummaryInput, request: Request, user: dict = Depen
     save_symptom_summary(user_id, summary)
 
     return {"message": "Ringkasan berhasil dibuat.", "summary": summary}
-
-
-
-
-@router.post("/send")
-async def send_symptom(input: SymptomInput, user: dict = Depends(verify_token)):
-    user_id = user["sub"]
-
-    from services.symptom_service import save_symptom_message
-    save_symptom_message(user_id, input.message, input.session_id)
-
-    return {"message": "Gejala berhasil disimpan"}
-

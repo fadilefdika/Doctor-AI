@@ -28,7 +28,7 @@ def register(auth: AuthRequest):
 
 
 @router.post("/login")
-def login(auth: AuthRequest):
+def login(auth: LoginRequest):
     result = login_user(auth.email, auth.password)
 
     # Jika error, raise HTTPException agar frontend dapat 400 dan pesan
