@@ -1,18 +1,16 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from utils.LLM_utils import ask_llm
+from routers import auth, chat, doctor
 
 app = FastAPI()
 
+app.include_router(auth.router)
+app.include_router(chat.router)
+app.include_router(doctor.router)
+
 class ChatRequest(BaseModel):
     message: str
-
-@app.post("/chat")
-def chat(request: ChatRequest):
-    reply = ask_llm(request.message)
-    return {"response": reply}
-
-
+    
 @app.get("/")
 def read_root():
     return {"welcome to doctor AI"}
