@@ -1,6 +1,7 @@
 from supabase import create_client, Client
 import os
 from dotenv import load_dotenv
+from gotrue.errors import AuthApiError
 
 # Load .env file
 load_dotenv()
@@ -26,22 +27,31 @@ def register_user(email: str, password: str, nama: str):
     return response
 
 # Fungsi login
-def login_user(email: str, password: str):
-    response = supabase.auth.sign_in_with_password({
-        "email": email,
-        "password": password
-    })
+def login_user(email: str, password: str) -> dict:
+    try:
+        response = supabase.auth.sign_in_with_password({
+            "email": email,
+            "password": password
+        })
 
-    if not response.session:
-        raise Exception("Login failed or session not returned.")
+        data = response.model_dump()
 
-    access_token = response.session.access_token
-    user = response.user
+        return {
+            "access_token": data["session"]["access_token"],
+            "user": data["user"]
+        }
 
-    return {
-        "user": user,
-        "access_token": access_token
-    }
+    except AuthApiError as e:
+        error_message = str(e).lower()
+
+        if "invalid login credentials" in error_message:
+            return {"error": "Email atau password salah"}
+        elif "user not found" in error_message:
+            return {"error": "Email tidak ditemukan"}
+        elif "email not confirmed" in error_message:
+            return {"error": "Email belum dikonfirmasi"}
+        else:
+            return {"error": f"Gagal login: {error_message}"}
 
 
 def get_user_profile(token: str):

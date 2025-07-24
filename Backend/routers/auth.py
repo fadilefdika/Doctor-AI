@@ -37,8 +37,10 @@ def login(auth: LoginRequest):
         "message": "Login successful",
         "access_token": result["access_token"],
         "token_type": "bearer",
-        "user": result["user"].email
+        "user": result["user"]["email"]
     }
+
+
 
 @router.get("/profile")
 def profile(authorization: str = Header(...)):
