@@ -111,7 +111,7 @@ export default function HomePage() {
           <Ionicons
             name={pathname === '/home' ? 'home' : 'home-outline'}
             size={26}
-            color="#3C84F5"
+            color="#0599ff"
           />
           <Text style={styles.navText}>Beranda</Text>
         </TouchableOpacity>
@@ -119,7 +119,7 @@ export default function HomePage() {
           <Ionicons
             name={pathname === '/produk' ? 'pricetag' : 'pricetag-outline'}
             size={26}
-            color="#3C84F5"
+            color="#0599ff"
           />
           <Text style={styles.navText}>Produk</Text>
         </TouchableOpacity>
@@ -127,7 +127,7 @@ export default function HomePage() {
           <Ionicons
             name={pathname === '/profile' ? 'person' : 'person-outline'}
             size={26}
-            color="#3C84F5"
+            color="#0599ff"
           />
           <Text style={styles.navText}>Profile</Text>
         </TouchableOpacity>
@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   sendButton: {
-    backgroundColor: '#3C84F5',
+    backgroundColor: '#0599ff',
     borderRadius: 20,
     width: 40,
     height: 40,
@@ -244,7 +244,7 @@ const styles = StyleSheet.create({
   },
   navText: {
     fontSize: 12,
-    color: '#3C84F5',
+    color: '#0599ff',
     marginTop: 2,
   },
   modalContent: {
@@ -265,7 +265,7 @@ modalMessage: {
 },
 modalClose: {
   fontSize: 16,
-  color: '#3C84F5',
+  color: '#0599ff',
   fontWeight: 'bold',
 },
 

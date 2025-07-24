@@ -60,15 +60,15 @@ export default function Profile() {
       {/* Bottom Navbar */}
       <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.navItem} onPress={() => router.push('/home')}>
-          <Ionicons name="home-outline" size={26} color="#3C84F5" />
+          <Ionicons name="home-outline" size={26} color="#0599ff" />
           <Text style={styles.navText}>Beranda</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem} onPress={() => router.push('/produk')}>
-          <Ionicons name="pricetag-outline" size={26} color="#3C84F5" />
+          <Ionicons name="pricetag-outline" size={26} color="#0599ff" />
           <Text style={styles.navText}>Produk</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem}>
-          <Ionicons name="person" size={26} color="#3C84F5" />
+          <Ionicons name="person" size={26} color="#0599ff" />
           <Text style={styles.navText}>Profile</Text>
         </TouchableOpacity>
       </View>
@@ -94,10 +94,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#3C84F5',
+    backgroundColor: '#0599ff',
     paddingVertical: 14,
     borderRadius: 14,
-    shadowColor: '#3C84F5',
+    shadowColor: '#0599ff',
     shadowOpacity: 0.3,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 4 },
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   },
   navText: {
     fontSize: 12,
-    color: '#3C84F5',
+    color: '#0599ff',
     marginTop: 2,
   },
 });

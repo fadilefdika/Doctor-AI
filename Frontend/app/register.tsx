@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   loginText: {
-    color: '#007AFF',
+    color: '#0599ff',
     fontSize: 14,
     textAlign: 'center',
   },
@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
   },
   modalClose: {
     fontSize: 16,
-    color: '#007AFF',
+    color: '#0599ff',
     fontWeight: '500',
   },
 });
