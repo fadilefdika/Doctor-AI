@@ -1,18 +1,29 @@
+import uuid
 from pydantic import BaseModel
-
 from fastapi import APIRouter, Request, Depends, HTTPException
 from middleware.auth_guard import verify_token
-from services.symptom_service import fetch_recent_symptoms, save_symptom_summary
+from services.symptom_service import fetch_recent_symptoms, save_symptom_summary, start_new_session
 from services.openai_llm import ask_gpt
 
 class SummaryInput(BaseModel):
     session_id: str
-    
+
 class SymptomInput(BaseModel):
     message: str
     session_id: str  # tambahkan ini
 
 router = APIRouter(prefix="/chat", tags=["chat"])
+
+@router.post("/start-session")
+async def start_session(user: dict = Depends(verify_token)):
+    user_id = user["sub"]
+    session_id = str(uuid.uuid4())  # generate session unik
+
+    # Simpan ke Supabase (opsional)
+    start_new_session(user_id, session_id)
+
+    return {"message": "Sesi baru dimulai", "session_id": session_id}
+
 
 @router.post("/summary")
 async def chat_summary(input: SummaryInput, request: Request, user: dict = Depends(verify_token)):

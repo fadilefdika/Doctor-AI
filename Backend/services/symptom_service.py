@@ -45,4 +45,8 @@ def save_symptom_message(user_id: str, message: str, session_id: str):
     return response
 
 
-
+def start_new_session(user_id: str, session_id: str):
+    supabase.from_("chat_sessions").insert({
+        "user_id": user_id,
+        "session_id": session_id
+    }).execute()
