@@ -42,3 +42,8 @@ def login_user(email: str, password: str):
         "user": user,
         "access_token": access_token
     }
+
+
+def get_user_profile(token: str):
+    response = supabase.auth.get_user(token)
+    return response.user if not response.get("error") else None
