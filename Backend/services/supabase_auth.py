@@ -19,12 +19,35 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # Fungsi register
 def register_user(email: str, password: str, nama: str):
-    response = supabase.auth.sign_up({
-        "email": email,
-        "password": password,
-        "nama" : nama
-    })
-    return response
+    try:
+        response = supabase.auth.sign_up({
+            "email": email,
+            "password": password,
+        })
+
+        # Jika ingin menyimpan `nama` ke user metadata
+        if response.user:
+            supabase.auth.update_user(
+                {"data": {"nama": nama}},
+                session=response.session.access_token if response.session else None
+            )
+
+        return {
+            "user": response.user,
+            "session": response.session,
+        }
+
+    except AuthApiError as e:
+        error_message = str(e).lower()
+
+        if "user already registered" in error_message:
+            return {"error": "Email sudah digunakan"}
+        elif "invalid email" in error_message:
+            return {"error": "Format email tidak valid"}
+        elif "password should be at least" in error_message:
+            return {"error": "Password terlalu pendek"}
+        else:
+            return {"error": f"Terjadi kesalahan saat registrasi: {e}"}
 
 # Fungsi login
 def login_user(email: str, password: str) -> dict:

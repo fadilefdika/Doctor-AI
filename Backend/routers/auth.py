@@ -12,17 +12,18 @@ class AuthRequest(BaseModel):
 class LoginRequest(BaseModel):
     email: str
     password: str
- 
+
+
 @router.post("/register")
 def register(auth: AuthRequest):
     result = register_user(auth.email, auth.password, auth.nama)
-    
-    if result and getattr(result, "error", None):
-        raise HTTPException(status_code=400, detail=result.error.message)
+
+    if result.get("error"):
+        raise HTTPException(status_code=400, detail=result["error"])
 
     return {
         "message": "User registered successfully",
-        "user": result.user.email if result.user else None,
+        "user": result["user"].email if result["user"] else None,
     }
 
 
