@@ -52,6 +52,6 @@ async def send_symptom(input: SymptomInput, user: dict = Depends(verify_token)):
     from services.symptom_service import save_symptom_message
     save_symptom_message(user_id, input.message)
 
-    return {"message": "Gejala berhasil disimpan."}
+    return {"message": "Gejala berhasil disimpan"}
 
 
