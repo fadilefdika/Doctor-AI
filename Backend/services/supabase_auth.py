@@ -17,10 +17,11 @@ print("SUPABASE_KEY:", SUPABASE_KEY[:8] + "..." if SUPABASE_KEY else None)
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # Fungsi register
-def register_user(email: str, password: str):
+def register_user(email: str, password: str, nama: str):
     response = supabase.auth.sign_up({
         "email": email,
-        "password": password
+        "password": password,
+        "nama" : nama
     })
     return response
 

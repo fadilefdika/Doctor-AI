@@ -7,10 +7,11 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 class AuthRequest(BaseModel):
     email: str
     password: str
-
+    nama: str
+ 
 @router.post("/register")
 def register(auth: AuthRequest):
-    result = register_user(auth.email, auth.password)
+    result = register_user(auth.email, auth.password, auth.nama)
     
     if result and getattr(result, "error", None):
         raise HTTPException(status_code=400, detail=result.error.message)
