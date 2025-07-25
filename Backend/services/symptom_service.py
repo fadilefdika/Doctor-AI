@@ -14,7 +14,7 @@ def fetch_recent_symptoms(user_id: str, session_id: str) -> list[dict]:
         .eq("user_id", user_id) \
         .eq("role", "user") \
         .eq("session_id", session_id) \
-        .order("created_at", desc=True) \
+        .order("created_at") \
         .execute()
 
     return response.data or []
@@ -32,21 +32,44 @@ def save_symptom_summary(user_id: str, summary: str) -> None:
         .execute()
 
 
-def save_symptom_message(user_id: str, message: str, session_id: str):
+def save_symptom_message(user_id: str, message: str, session_id: str, role: str = "user"):
     response = supabase \
         .from_("chat_messages") \
         .insert({
             "user_id": user_id,
             "message": message,
-            "role": "user",
+            "role": role,
             "session_id": session_id
         }) \
         .execute()
     return response
 
+def build_messages_with_history(user_id: str, session_id: str, new_user_message: str) -> list[dict]:
+    # Ambil histori chat dari session ini
+    response = supabase \
+        .from_("chat_messages") \
+        .select("role, message") \
+        .eq("user_id", user_id) \
+        .eq("session_id", session_id) \
+        .order("created_at") \
+        .execute()
+
+    history = response.data or []
+    messages = [{"role": msg["role"], "content": msg["message"]} for msg in history]
+
+    # Tambahkan input user terbaru (jika belum dimasukkan)
+    messages.append({"role": "user", "content": new_user_message})
+
+    return messages
+
+
 
 def start_new_session(user_id: str, session_id: str):
-    supabase.from_("chat_sessions").insert({
-        "user_id": user_id,
-        "session_id": session_id
-    }).execute()
+    supabase \
+        .from_("chat_sessions") \
+        .insert({
+            "id": session_id,  # jika ID UUID digunakan sebagai primary key
+            "user_id": user_id,
+            "created_at": datetime.utcnow().isoformat()
+        }) \
+        .execute()
