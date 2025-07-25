@@ -35,8 +35,10 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
+      console.log(name,email,password);
+      
       const response = await axios.post('http://18.142.179.240:8001/auth/register', {
-        username: name,
+        nama: name,
         email,
         password,
       });
