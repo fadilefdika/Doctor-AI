@@ -54,18 +54,22 @@ export default function Profile() {
       {/* Tombol Logout modern iOS-style */}
       <TouchableOpacity onPress={handleLogout} style={styles.logoutBtn}>
         <Ionicons name="log-out-outline" size={22} color="#fff" />
-        <Text style={styles.logoutText}>Keluar</Text>
+        <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
 
       {/* Bottom Navbar */}
       <View style={styles.bottomNav}>
         <TouchableOpacity style={styles.navItem} onPress={() => router.push('/home')}>
           <Ionicons name="home-outline" size={26} color="#0599ff" />
-          <Text style={styles.navText}>Beranda</Text>
+          <Text style={styles.navText}>Home</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/produk')}>
-          <Ionicons name="pricetag-outline" size={26} color="#0599ff" />
-          <Text style={styles.navText}>Produk</Text>
+        <TouchableOpacity style={styles.navItem} onPress={() => router.push('/doctor')}>
+          <Ionicons
+            name="medkit-outline"
+            size={26}
+            color="#0599ff"
+          />
+          <Text style={styles.navText}>Medic</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.navItem}>
           <Ionicons name="person" size={26} color="#0599ff" />
@@ -77,7 +81,9 @@ export default function Profile() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  container: { 
+    alignItems: 'center',
+    justifyContent: 'center',
     flex: 1,
     padding: 24,
     paddingBottom: 80,
@@ -91,6 +97,7 @@ const styles = StyleSheet.create({
   },
   logoutBtn: {
     marginTop: 550,
+    width:200,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
