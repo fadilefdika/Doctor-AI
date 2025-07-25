@@ -31,10 +31,10 @@ export default function ChatBox({
   const [error, setError] = useState('');
   const [token, setToken] = useState<string | null>(null);
   const [showNewSessionModal, setShowNewSessionModal] = useState(false);
+  const [showSummaryModal, setShowSummaryModal] = useState(false);
+  const [summaryResult, setSummaryResult] = useState('');
 
   useEffect(() => {
-
-
     (async () => {
       await loadToken();
     })();
@@ -79,9 +79,9 @@ export default function ChatBox({
   };
 
   const handleSend = async () => {
-    console.log(sessionId);
     const trimmed = currentInput.trim();
     if (!trimmed) return;
+
     const updatedInputs = [...inputs, trimmed];
     setInputs(updatedInputs);
     setCurrentInput('');
@@ -105,43 +105,61 @@ export default function ChatBox({
     }
   };
 
+  const handleNewSession = () => {
+    onNewSession?.('new');
+    setInputs([]);
+    setCurrentInput('');
+    setResponse('');
+    setShowNewSessionModal(false);
+  };
 
-  const handleNewSession = async () => {
+  const fetchSummary = async () => {
     try {
       if (!token) throw new Error('Token not loaded');
+      if (!sessionId) throw new Error('No session ID found');
 
-      // const newId = await startSession();
-      onNewSession?.("new"); // beritahu parent session baru
-      setInputs([]);
-      setCurrentInput('');
-      setResponse('');
-      setShowNewSessionModal(false);
+      setLoading(true);
+      const res = await axios.post(
+        'http://18.142.179.240:8001/chat/summary',
+        { session_id: sessionId },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(res.data)
+      setSummaryResult(res.data?.summary || 'No summary provided.');
+      setShowSummaryModal(true);
     } catch (err: any) {
-      setError(err.message || 'Failed to start a new session.');
+      setError(err.message || 'Failed to fetch summary');
+    } finally {
+      setLoading(false);
     }
   };
 
-
-
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={{ flex: 1, backgroundColor: '#f9f9fb' }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'position'}
+      style={{ flex: 1 }}
+      keyboardVerticalOffset={2}
     >
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-        <View style={styles.chatArea}>
-          {/* {inputs.map((input, index) => (
-    <View key={index} style={styles.chatBubble}>
-      <Text style={styles.chatText}>{input}</Text>
-    </View>
-  ))} */}
-          {response && !isSidebar && (
-            <View style={[styles.chatBubble, { backgroundColor: '#f7f7f7ff' }]}>
-              <Text style={styles.chatText}>{response}</Text>
-            </View>
-          )}
-        </View>
 
+      <View style={{ flex: 1 }}>
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={styles.container}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.chatArea}>
+            {response && !isSidebar && (
+              <View style={[styles.chatBubble, { backgroundColor: '#f7f7f7ff' }]}>
+                <Text style={styles.chatText}>{response}</Text>
+              </View>
+            )}
+          </View>
+        </ScrollView>
 
         {!isSidebar && (
           <View style={styles.inputContainer}>
@@ -154,7 +172,6 @@ export default function ChatBox({
               multiline
               editable={!loading}
             />
-
             <TouchableOpacity
               onPress={handleSend}
               onLongPress={() => setShowNewSessionModal(true)}
@@ -167,10 +184,33 @@ export default function ChatBox({
                 <Ionicons name="arrow-up" size={20} color="#fff" />
               )}
             </TouchableOpacity>
-
           </View>
         )}
-      </ScrollView>
+      </View>
+      {(!isSidebar && inputs.length >= 3) && (
+        <TouchableOpacity
+          style={styles.summaryButton}
+          onPress={fetchSummary}
+          disabled={loading || !sessionId}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="document-text-outline" size={20} color="#fff" style={{ marginRight: 8 }} />
+          <Text style={styles.summaryButtonText}>
+            {loading ? 'Loading...' : 'View Summary'}
+          </Text>
+        </TouchableOpacity>
+
+      )}
+      {/* Summary Modal */}
+      <Modal isVisible={showSummaryModal} onBackdropPress={() => setShowSummaryModal(false)}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>Summary</Text>
+          <Text style={styles.modalMessage}>{summaryResult}</Text>
+          <TouchableOpacity onPress={() => setShowSummaryModal(false)} style={styles.closeButton}>
+            <Text style={styles.closeButtonText}>Close</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
 
       {/* Error Modal */}
       <Modal isVisible={!!error} onBackdropPress={() => setError('')}>
@@ -221,12 +261,6 @@ const styles = StyleSheet.create({
   chatArea: {
     marginBottom: 20,
   },
-  label: {
-    fontSize: 15,
-    color: '#777',
-    textAlign: 'center',
-    marginBottom: 12,
-  },
   chatBubble: {
     backgroundColor: '#f0f0f5',
     padding: 16,
@@ -237,7 +271,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 6,
     elevation: 3,
-    alignSelf: 'flex-start', // 👈 Mojok kiri
+    alignSelf: 'flex-start',
   },
   chatText: {
     fontSize: 16,
@@ -256,6 +290,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowRadius: 6,
     elevation: 4,
+    marginBottom: 10
   },
   input: {
     flex: 1,
@@ -263,7 +298,6 @@ const styles = StyleSheet.create({
     color: '#111',
     paddingVertical: 6,
     maxHeight: 100,
-    marginBottom: 4,
   },
   sendButton: {
     marginLeft: 12,
@@ -287,7 +321,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#333',
     textAlign: 'center',
-    marginBottom: 20,
+    // marginBottom: 20,
   },
   closeButton: {
     borderRadius: 10,
@@ -298,4 +332,26 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
   },
+  summaryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    marginTop: 14,
+    backgroundColor: '#34c759',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 4,
+  },
+  summaryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+
 });
