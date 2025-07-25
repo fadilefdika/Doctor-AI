@@ -1,4 +1,5 @@
 import os
+import re
 from datetime import datetime
 from supabase import create_client, Client
 
@@ -88,3 +89,17 @@ def start_new_session(user_id: str, session_id: str):
             "created_at": datetime.utcnow().isoformat()
         }) \
         .execute()
+
+
+def parse_flashcards(text: str):
+    pattern = r"- Judul: (.*?)\n- Isi: (.*?)\n- Tipe: (.*?)\n?"
+    matches = re.findall(pattern, text, re.DOTALL)
+    flashcards = []
+
+    for title, content, ftype in matches:
+        flashcards.append({
+            "judul": title.strip(),
+            "isi": content.strip(),
+            "tipe": ftype.strip()
+        })
+    return flashcards
