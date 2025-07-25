@@ -40,7 +40,7 @@ export default function Profile() {
         const token = await AsyncStorage.getItem('token');
         if (!token) throw new Error('Token not found');
 
-        const res = await axios.get('https://plants-oem-adjustments-lightweight.trycloudflare.com/chat/flashcards', {
+        const res = await axios.get('https://filme-roads-boots-buffalo.trycloudflare.com/chat/flashcards', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
