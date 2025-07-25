@@ -45,7 +45,20 @@ def save_symptom_message(user_id: str, message: str, session_id: str, role: str 
     return response
 
 def build_messages_with_history(user_id: str, session_id: str, new_user_message: str) -> list[dict]:
-    # Ambil histori chat dari session ini
+    # System Prompt sebagai panduan gaya respons GPT
+    system_prompt = {
+        "role": "system",
+        "content": (
+            "Kamu adalah asisten kesehatan berbasis AI. "
+            "Tugasmu adalah membantu pengguna memahami kemungkinan kondisi berdasarkan gejala yang mereka alami. "
+            "Berikan prediksi awal tentang kemungkinan penyakit berdasarkan gejala umum. "
+            "Sertakan saran singkat (misalnya, istirahat, periksa ke dokter jika memburuk, dll). "
+            "Namun, **selalu berikan disclaimer bahwa ini hanyalah prediksi awal dan bukan diagnosis medis pasti.** "
+            "Kamu bukan dokter sungguhan, dan pengguna tetap harus berkonsultasi ke dokter profesional."
+        )
+    }
+
+    # Ambil histori chat dari Supabase
     response = supabase \
         .from_("chat_messages") \
         .select("role, message") \
@@ -57,10 +70,12 @@ def build_messages_with_history(user_id: str, session_id: str, new_user_message:
     history = response.data or []
     messages = [{"role": msg["role"], "content": msg["message"]} for msg in history]
 
-    # Tambahkan input user terbaru (jika belum dimasukkan)
+    # Tambahkan pesan terbaru dari user
     messages.append({"role": "user", "content": new_user_message})
 
-    return messages
+    # Gabungkan dengan system prompt di awal
+    return [system_prompt] + messages
+
 
 
 
