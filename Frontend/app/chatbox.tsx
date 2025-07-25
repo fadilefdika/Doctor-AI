@@ -14,6 +14,7 @@ import Modal from 'react-native-modal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
+import { useRouter } from 'expo-router';
 
 export default function ChatBox({
   isSidebar,
@@ -33,6 +34,7 @@ export default function ChatBox({
   const [showNewSessionModal, setShowNewSessionModal] = useState(false);
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [summaryResult, setSummaryResult] = useState('');
+const router = useRouter();
 
   useEffect(() => {
     (async () => {
@@ -208,6 +210,15 @@ export default function ChatBox({
             <Text style={styles.closeButtonText}>Close</Text>
           </TouchableOpacity>
         </View>
+        <TouchableOpacity
+  style={styles.doctorButton}
+  onPress={() => router.push('/doctor')}
+  activeOpacity={0.8}
+>
+  <Ionicons name="person-circle-outline" size={20} color="#fff" style={{ marginRight: 8 }} />
+  <Text style={styles.doctorButtonText}>Consult a Doctor</Text>
+</TouchableOpacity>
+
       </Modal>
 
       {/* Error Modal */}
@@ -352,5 +363,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+doctorButton: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  justifyContent: 'center',
+  alignSelf: 'center',
+  marginTop: 10,
+  backgroundColor: '#007aff',
+  paddingVertical: 12,
+  paddingHorizontal: 20,
+  borderRadius: 30,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 3 },
+  shadowOpacity: 0.1,
+  shadowRadius: 5,
+  elevation: 4,
+},
+doctorButtonText: {
+  color: '#fff',
+  fontSize: 16,
+  fontWeight: '600',
+},
 
 });
