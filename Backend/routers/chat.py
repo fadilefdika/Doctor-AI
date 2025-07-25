@@ -6,7 +6,8 @@ from services.symptom_service import (
     fetch_recent_symptoms,
     save_symptom_summary,
     start_new_session,
-    save_symptom_message
+    save_symptom_message,
+    build_messages_with_history
 )
 from services.openai_llm import ask_gpt
 
@@ -32,8 +33,24 @@ async def start_session(user: dict = Depends(verify_token)):
 @router.post("/send")
 async def send_symptom(input: SymptomInput, user: dict = Depends(verify_token)):
     user_id = user["sub"]
-    save_symptom_message(user_id, input.message, input.session_id)
-    return {"message": "Gejala berhasil disimpan"}
+
+    # 1. Simpan pesan user
+    save_symptom_message(user_id, input.message, input.session_id, role="user")
+
+    # 2. Persiapkan konteks percakapan dari sesi
+    messages = build_messages_with_history(user_id, input.session_id, input.message)
+
+    # 3. Kirim ke GPT
+    try:
+        gpt_response = ask_gpt(*messages)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error from GPT: {str(e)}")
+
+    # 4. Simpan respon GPT
+    save_symptom_message(user_id, gpt_response, input.session_id, role="assistant")
+
+    return {"response": gpt_response}
+
 
 @router.post("/summary")
 async def chat_summary(input: SummaryInput, request: Request, user: dict = Depends(verify_token)):
