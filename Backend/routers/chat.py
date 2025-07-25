@@ -1,4 +1,5 @@
 import uuid
+import os
 from pydantic import BaseModel
 from fastapi import APIRouter, Request, Depends, HTTPException
 from middleware.auth_guard import verify_token
@@ -11,6 +12,13 @@ from services.symptom_service import (
     parse_flashcards
 )
 from services.openai_llm import ask_gpt
+from supabase import create_client, Client
+
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
 
 router = APIRouter(prefix="/chat", tags=["chat"])
 
