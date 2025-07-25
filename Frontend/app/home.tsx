@@ -14,21 +14,34 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Modal from 'react-native-modal';
-
+const dummySessions = [
+  { id: '1', title: 'Headache and fatigue' },
+  { id: '2', title: 'Fever and chills' },
+  { id: '3', title: 'Cough with sore throat' },
+  { id: '4', title: 'Stomach ache' },
+  { id: '5', title: 'Skin rash' },
+]
 export default function HomePage() {
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [modal, setModal] = useState({ visible: false, title: '', message: '' });
-  const [sessions, setSessions] = useState<string[]>([]);
+  const [sessions, setSessions] = useState<any[]>([]);
   const [sidebarVisible, setSidebarVisible] = useState(false);
-
   const router = useRouter();
   const pathname = usePathname();
-
   const showModal = (title: string, message: string) => {
     setModal({ visible: true, title, message });
   };
+  const handleNewSession = (id: string | null) => {
+    if (id == "new") {
+      setCurrentSessionId(null)
+    } else {
+      dummySessions.unshift({ id: id, title: " " })
+      setCurrentSessionId(id);
 
+    }
+  };
   useEffect(() => {
-    const checkToken = async () => {
+    const checkTokenAndLoadDummySessions = async () => {
       try {
         const token = await AsyncStorage.getItem('token');
         if (!token) {
@@ -37,7 +50,13 @@ export default function HomePage() {
             setModal({ ...modal, visible: false });
             router.replace('/login');
           }, 1500);
+          return;
         }
+
+
+
+
+        setSessions(dummySessions);
       } catch (err) {
         console.error('Token check failed:', err);
         showModal('Error', 'Failed to read token.');
@@ -48,11 +67,12 @@ export default function HomePage() {
       }
     };
 
-    checkToken();
+    checkTokenAndLoadDummySessions();
 
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => true);
     return () => backHandler.remove();
   }, []);
+
 
   return (
     <View style={styles.container}>
@@ -64,11 +84,15 @@ export default function HomePage() {
         <View style={{ flexDirection: 'row', flex: 1 }}>
           {sidebarVisible && (
             <View style={styles.sidebar}>
-              <Text style={styles.sidebarTitle}>Sessions</Text>
+              {/* <Text style={styles.sidebarTitle}>Sessions</Text> */}
               {sessions.map((session, index) => (
-                <View key={index} style={styles.sessionItem}>
-                  <Text style={styles.sessionText}>Session {index + 1}</Text>
-                </View>
+                <TouchableOpacity
+                  key={session.id}
+                  style={styles.sessionItem}
+                  onPress={() => setCurrentSessionId(session.id)}
+                >
+                  <Text style={styles.sessionText}>{session.title}</Text>
+                </TouchableOpacity>
               ))}
             </View>
           )}
@@ -83,8 +107,7 @@ export default function HomePage() {
                 color="#333"
               />
             </TouchableOpacity>
-            {/* {sidebarVisible ? <></> : <Text style={styles.title}>👋 Welcome</Text>} */}
-            <ChatBox isSidebar={sidebarVisible} />
+            <ChatBox isSidebar={sidebarVisible} sessionId={currentSessionId} onNewSession={handleNewSession} />
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
@@ -139,7 +162,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'flex-start',
     paddingHorizontal: 20,
-    paddingTop: 80,
+    paddingTop: 60,
     paddingBottom: 20,
   },
   title: {
@@ -197,29 +220,47 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   sidebar: {
-    width: 150,
-    backgroundColor: '#fdfcfcff',
+    width: 190,
+    backgroundColor: '#fdfdfd',
     paddingTop: 60,
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
     borderRightWidth: 1,
-    borderColor: '#ccc',
+    borderColor: '#e0e0e0',
+    shadowColor: '#000',
+    shadowOffset: { width: 2, height: 0 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 4,
   },
+
   sidebarTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  sessionItem: {
-    paddingVertical: 8,
-    paddingHorizontal: 6,
-    marginBottom: 8,
-    borderRadius: 6,
-    backgroundColor: '#fff',
-  },
-  sessionText: {
-    fontSize: 13,
+    fontSize: 15,
+    fontWeight: '600',
+    marginBottom: 16,
+    textAlign: 'left',
     color: '#333',
-    textAlign: 'center',
   },
+
+  sessionItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    marginBottom: 10,
+    borderRadius: 8,
+    backgroundColor: '#ffffffff',
+    borderWidth: 1,
+    borderColor: '#f6f4f4ff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.01,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+
+  sessionText: {
+    fontSize: 14,
+    color: '#333',
+    textAlign: 'left',
+    fontWeight: '500',
+  },
+
 });

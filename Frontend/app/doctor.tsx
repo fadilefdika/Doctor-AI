@@ -16,13 +16,13 @@ import { useRouter } from 'expo-router';
 import DoctorCard from './doctorcard';
 
 const MOCK_DOCTORS = [
-  { id: '1', name: 'Dr. Sinta Jaya', specialty: 'Penyakit Dalam', image: 'https://i.pravatar.cc/100?img=1' },
-  { id: '2', name: 'Dr. Andi Teguh', specialty: 'Anak', image: 'https://i.pravatar.cc/100?img=2' },
-  { id: '3', name: 'Dr. Rina Kusuma', specialty: 'Jantung', image: 'https://i.pravatar.cc/100?img=3' },
-  { id: '4', name: 'Dr. Budi Prakoso', specialty: 'Umum', image: 'https://i.pravatar.cc/100?img=4' },
+  { id: '1', name: 'Dr. Sinta Jaya', specialty: 'Internal Medicine', image: 'https://i.pravatar.cc/100?img=1' },
+  { id: '2', name: 'Dr. Andi Teguh', specialty: 'Pediatrics', image: 'https://i.pravatar.cc/100?img=2' },
+  { id: '3', name: 'Dr. Rina Kusuma', specialty: 'Cardiology', image: 'https://i.pravatar.cc/100?img=3' },
+  { id: '4', name: 'Dr. Budi Prakoso', specialty: 'General Practitioner', image: 'https://i.pravatar.cc/100?img=4' },
 ];
 
-const SUGGESTIONS = ['medic', 'anak', 'jantung', 'umum'];
+const SUGGESTIONS = ['internal', 'pediatrics', 'cardiology', 'general'];
 
 export default function DoctorPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -39,7 +39,6 @@ export default function DoctorPage() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View style={styles.container}>
-
           <View style={styles.searchBoxWrapper}>
             <TextInput
               placeholder="Search by keyword..."
@@ -67,16 +66,22 @@ export default function DoctorPage() {
             ))}
           </ScrollView>
 
-          <FlatList
-            data={filteredDoctors}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => <DoctorCard doctor={item} />}
-            ListEmptyComponent={
-              <Text style={styles.emptyText}>🧐 No doctors found.</Text>
-            }
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 100 }}
-          />
+         <FlatList
+  data={filteredDoctors}
+  keyExtractor={(item) => item.id}
+  renderItem={({ item }) => <DoctorCard doctor={item} />}
+  ListEmptyComponent={
+    <Text style={styles.emptyText}>🧐 No doctors found.</Text>
+  }
+  ListHeaderComponent={filteredDoctors.length === 1 ? <View style={{ height: 0 }} /> : null}
+  showsVerticalScrollIndicator={false}
+  keyboardShouldPersistTaps="handled"
+  contentContainerStyle={[
+    { paddingBottom: 100, flexGrow: 1 },
+    filteredDoctors.length === 1 && { justifyContent: 'flex-start' },
+  ]}
+/>
+
         </View>
 
         <View style={styles.bottomNav}>
@@ -103,13 +108,8 @@ const styles = StyleSheet.create({
     padding: 20,
     backgroundColor: '#f2f4f7',
     flex: 1,
-    paddingTop:80
-  },
-  header: {
-    fontSize: 26,
-    fontWeight: '600',
-    color: '#1e1e1e',
-    marginBottom: 20,
+    paddingTop: 80,
+    justifyContent:"flex-start"
   },
   searchBoxWrapper: {
     backgroundColor: '#fff',
@@ -128,10 +128,11 @@ const styles = StyleSheet.create({
     color: '#111',
   },
   suggestionsContainer: {
-    flexDirection: 'row'
+    flexDirection: 'row',
+    marginBottom: 10,
   },
   suggestionChip: {
-    height:40,
+    height: 40,
     backgroundColor: '#e6ecf2',
     paddingVertical: 8,
     paddingHorizontal: 16,

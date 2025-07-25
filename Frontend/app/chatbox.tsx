@@ -15,48 +15,30 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 
-export default function ChatBox({ isSidebar, onNewSession }: { isSidebar: boolean; onNewSession?: (id: string) => void }) {
+export default function ChatBox({
+  isSidebar,
+  sessionId,
+  onNewSession,
+}: {
+  isSidebar: boolean;
+  sessionId: string | null;
+  onNewSession?: (id: string) => void;
+}) {
   const [inputs, setInputs] = useState<string[]>([]);
   const [currentInput, setCurrentInput] = useState('');
   const [response, setResponse] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [sessionId, setSessionId] = useState<string | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [showNewSessionModal, setShowNewSessionModal] = useState(false);
 
   useEffect(() => {
+
+
     (async () => {
       await loadToken();
-      await loadSessionId();
     })();
   }, []);
-
-  const loadSessionId = async () => {
-    try {
-      const stored = await AsyncStorage.getItem('session_id');
-      if (stored) setSessionId(stored);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load session ID');
-    }
-  };
-
-  const saveSessionId = async (id: string) => {
-    try {
-      await AsyncStorage.setItem('session_id', id);
-    } catch (err: any) {
-      setError(err.message || 'Failed to save session ID');
-    }
-  };
-
-  const clearSessionId = async () => {
-    try {
-      await AsyncStorage.removeItem('session_id');
-      setSessionId(null);
-    } catch (err: any) {
-      setError(err.message || 'Failed to clear session ID');
-    }
-  };
 
   const loadToken = async () => {
     try {
@@ -97,9 +79,9 @@ export default function ChatBox({ isSidebar, onNewSession }: { isSidebar: boolea
   };
 
   const handleSend = async () => {
+    console.log(sessionId);
     const trimmed = currentInput.trim();
-    if (!trimmed || inputs.length >= 3) return;
-
+    if (!trimmed) return;
     const updatedInputs = [...inputs, trimmed];
     setInputs(updatedInputs);
     setCurrentInput('');
@@ -111,12 +93,10 @@ export default function ChatBox({ isSidebar, onNewSession }: { isSidebar: boolea
       let id = sessionId;
       if (!id) {
         id = await startSession();
-        setSessionId(id);
-        await saveSessionId(id);
-        onNewSession?.(id); // Pass ke parent jika diperlukan
+        onNewSession?.(id);
       }
 
-      const reply = await sendMessages(id, [trimmed]);
+      const reply = await sendMessages(id!, [trimmed]);
       setResponse(reply);
     } catch (err: any) {
       setError(err.message || 'Something went wrong.');
@@ -125,13 +105,23 @@ export default function ChatBox({ isSidebar, onNewSession }: { isSidebar: boolea
     }
   };
 
+
   const handleNewSession = async () => {
-    await clearSessionId();
-    setInputs([]);
-    setCurrentInput('');
-    setResponse('');
-    setShowNewSessionModal(false);
+    try {
+      if (!token) throw new Error('Token not loaded');
+
+      // const newId = await startSession();
+      onNewSession?.("new"); // beritahu parent session baru
+      setInputs([]);
+      setCurrentInput('');
+      setResponse('');
+      setShowNewSessionModal(false);
+    } catch (err: any) {
+      setError(err.message || 'Failed to start a new session.');
+    }
   };
+
+
 
   return (
     <KeyboardAvoidingView
@@ -140,14 +130,18 @@ export default function ChatBox({ isSidebar, onNewSession }: { isSidebar: boolea
     >
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
         <View style={styles.chatArea}>
-          {response ? ( isSidebar ? <></> : 
-            <View style={styles.chatBubble}>
+          {/* {inputs.map((input, index) => (
+    <View key={index} style={styles.chatBubble}>
+      <Text style={styles.chatText}>{input}</Text>
+    </View>
+  ))} */}
+          {response && !isSidebar && (
+            <View style={[styles.chatBubble, { backgroundColor: '#f7f7f7ff' }]}>
               <Text style={styles.chatText}>{response}</Text>
             </View>
-          ) : !isSidebar && inputs.length === 0 ? (
-            <Text style={styles.label}>Please describe your symptom</Text>
-          ) : null}
+          )}
         </View>
+
 
         {!isSidebar && (
           <View style={styles.inputContainer}>
@@ -158,13 +152,14 @@ export default function ChatBox({ isSidebar, onNewSession }: { isSidebar: boolea
               placeholder="Describe your symptom..."
               placeholderTextColor="#aaa"
               multiline
-              editable={!loading && inputs.length < 3}
+              editable={!loading}
             />
+
             <TouchableOpacity
               onPress={handleSend}
               onLongPress={() => setShowNewSessionModal(true)}
               style={styles.sendButton}
-              disabled={loading || inputs.length >= 3}
+              disabled={loading}
             >
               {loading ? (
                 <ActivityIndicator color="#fff" />
@@ -172,6 +167,7 @@ export default function ChatBox({ isSidebar, onNewSession }: { isSidebar: boolea
                 <Ionicons name="arrow-up" size={20} color="#fff" />
               )}
             </TouchableOpacity>
+
           </View>
         )}
       </ScrollView>
@@ -223,7 +219,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   chatArea: {
-    marginBottom: 30,
+    marginBottom: 20,
   },
   label: {
     fontSize: 15,
