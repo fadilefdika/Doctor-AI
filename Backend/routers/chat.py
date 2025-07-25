@@ -32,24 +32,47 @@ async def start_session(user: dict = Depends(verify_token)):
 
 @router.post("/send")
 async def send_symptom(input: SymptomInput, user: dict = Depends(verify_token)):
+    print("✅ [1] Endpoint /send terpanggil")
+
+    # Ambil user_id dari token
     user_id = user["sub"]
+    print(f"✅ [2] User ID terverifikasi: {user_id}")
 
-    # 1. Simpan pesan user
-    save_symptom_message(user_id, input.message, input.session_id, role="user")
-
-    # 2. Persiapkan konteks percakapan dari sesi
-    messages = build_messages_with_history(user_id, input.session_id, input.message)
-
-    # 3. Kirim ke GPT
+    # Simpan pesan user
     try:
-        gpt_response = ask_gpt(*messages)
+        save_symptom_message(user_id, input.message, input.session_id, role="user")
+        print(f"✅ [3] Pesan user disimpan: {input.message}")
     except Exception as e:
+        print(f"❌ [3] Gagal simpan pesan user: {e}")
+
+    # Bangun konteks percakapan
+    try:
+        messages = build_messages_with_history(user_id, input.session_id, input.message)
+        print(f"✅ [4] Konteks percakapan dibangun")
+    except Exception as e:
+        print(f"❌ [4] Gagal membangun konteks: {e}")
+        raise HTTPException(status_code=500, detail=f"Gagal membangun konteks: {str(e)}")
+
+    # Kirim ke GPT
+    try:
+        print("⏳ [5] Mengirim ke GPT...")
+        gpt_response = ask_gpt(*messages)
+        print(f"✅ [5] GPT memberikan respon: {gpt_response[:100]}...")  # tampilkan sebagian
+    except Exception as e:
+        print(f"❌ [5] Error dari GPT: {e}")
         raise HTTPException(status_code=500, detail=f"Error from GPT: {str(e)}")
 
-    # 4. Simpan respon GPT
-    save_symptom_message(user_id, gpt_response, input.session_id, role="assistant")
+    # Simpan respon GPT
+    try:
+        save_symptom_message(user_id, gpt_response, input.session_id, role="assistant")
+        print("✅ [6] Respon GPT disimpan")
+    except Exception as e:
+        print(f"❌ [6] Gagal simpan respon GPT: {e}")
 
+    # Return ke frontend
+    print("✅ [7] Mengirim respon ke frontend")
     return {"response": gpt_response}
+
 
 
 @router.post("/summary")
