@@ -7,7 +7,8 @@ from services.symptom_service import (
     save_symptom_summary,
     start_new_session,
     save_symptom_message,
-    build_messages_with_history
+    build_messages_with_history,
+    parse_flashcards
 )
 from services.openai_llm import ask_gpt
 
@@ -84,3 +85,66 @@ async def chat_summary(input: SummaryInput, request: Request, user: dict = Depen
     save_symptom_summary(user_id, summary)
 
     return {"message": "Ringkasan berhasil dibuat.", "summary": summary}
+
+
+@router.get("/flashcards")
+async def get_multiple_flashcards(user: dict = Depends(verify_token)):
+    user_id = user["sub"]
+
+    # Ambil 4 sesi terakhir milik user
+    session_response = supabase \
+        .from_("chat_sessions") \
+        .select("id, created_at") \
+        .eq("user_id", user_id) \
+        .order("created_at", desc=True) \
+        .limit(4) \
+        .execute()
+
+    sessions = session_response.data or []
+
+    if not sessions:
+        return {"flashcards": []}
+
+    flashcard_results = []
+
+    for session in sessions:
+        session_id = session["id"]
+
+        # Ambil pesan user dari sesi tersebut
+        msg_response = supabase \
+            .from_("chat_messages") \
+            .select("message") \
+            .eq("session_id", session_id) \
+            .eq("user_id", user_id) \
+            .eq("role", "user") \
+            .order("created_at") \
+            .execute()
+
+        messages = [m["message"] for m in msg_response.data or []]
+
+        if not messages:
+            continue  # skip session yang tidak ada pesannya
+
+        combined_prompt = " ".join(messages)
+
+        gpt_prompt = f"""
+        Berdasarkan percakapan berikut: "{combined_prompt}", buatkan 3 flashcard edukasi medis untuk pengguna. 
+        Format masing-masing flashcard:
+        - Judul: ...
+        - Isi: ...
+        - Tipe: (Edukasi Gejala / Edukasi Penyakit / Tips Kesehatan)
+
+        Jangan beri saran medis pasti, cukup edukatif.
+        """
+
+        try:
+            result = ask_gpt({"role": "system", "content": gpt_prompt})
+            parsed_cards = parse_flashcards(result)
+            flashcard_results.extend(parsed_cards)
+        except Exception as e:
+            continue  # skip jika ada error pada satu sesi
+
+    if not flashcard_results:
+        raise HTTPException(status_code=404, detail="Tidak ada flashcard yang bisa dihasilkan.")
+
+    return {"flashcards": flashcard_results}

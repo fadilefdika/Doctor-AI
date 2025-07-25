@@ -8,7 +8,6 @@ load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))  # ✅ Ini akan berhasil setelah .env diload
 
 def ask_gpt(*messages: dict) -> str:
-    print("✅ OpenAI client berhasil dibuat", client)
     try:
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
