@@ -70,6 +70,6 @@ def start_new_session(user_id: str, session_id: str):
         .insert({
             "id": session_id,  # jika ID UUID digunakan sebagai primary key
             "user_id": user_id,
-            "started_at": datetime.utcnow().isoformat()
+            "created_at": datetime.utcnow().isoformat()
         }) \
         .execute()
