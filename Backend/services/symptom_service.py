@@ -51,7 +51,7 @@ def build_messages_with_history(user_id: str, session_id: str, new_user_message:
         .select("role, message") \
         .eq("user_id", user_id) \
         .eq("session_id", session_id) \
-        .order("created_at", desc=False) \
+        .order("created_at") \
         .execute()
 
     history = response.data or []
