@@ -34,7 +34,7 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            const response = await axios.post('https://filme-roads-boots-buffalo.trycloudflare.com/auth/login', {
+            const response = await axios.post(' https://stores-lands-simultaneously-definitely.trycloudflare.com/auth/login', {
                 email,
                 password,
             });

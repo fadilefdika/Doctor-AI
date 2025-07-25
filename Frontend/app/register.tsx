@@ -37,7 +37,7 @@ export default function RegisterPage() {
     try {
       console.log(name,email,password);
       
-      const response = await axios.post('https://filme-roads-boots-buffalo.trycloudflare.com/auth/register', {
+      const response = await axios.post(' https://stores-lands-simultaneously-definitely.trycloudflare.com/auth/register', {
         nama: name,
         email,
         password,

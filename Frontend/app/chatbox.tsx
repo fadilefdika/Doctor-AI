@@ -54,7 +54,7 @@ const router = useRouter();
 
   const startSession = async () => {
     const res = await axios.post(
-      'https://filme-roads-boots-buffalo.trycloudflare.com/chat/start-session',
+      ' https://stores-lands-simultaneously-definitely.trycloudflare.com/chat/start-session',
       {},
       {
         headers: {
@@ -68,7 +68,7 @@ const router = useRouter();
 
   const sendMessages = async (id: string, messages: string[]) => {
     const res = await axios.post(
-      'https://filme-roads-boots-buffalo.trycloudflare.com/chat/send',
+      ' https://stores-lands-simultaneously-definitely.trycloudflare.com/chat/send',
       { session_id: id, message: messages.join('\n') },
       {
         headers: {
@@ -122,7 +122,7 @@ const router = useRouter();
 
       setLoading(true);
       const res = await axios.post(
-        'https://filme-roads-boots-buffalo.trycloudflare.com/chat/summary',
+        ' https://stores-lands-simultaneously-definitely.trycloudflare.com/chat/summary',
         { session_id: sessionId },
         {
           headers: {
