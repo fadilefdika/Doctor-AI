@@ -28,8 +28,7 @@ def register_user(email: str, password: str, nama: str):
         # Jika ingin menyimpan `nama` ke user metadata
         if response.user:
             supabase.auth.update_user(
-                {"data": {"nama": nama}},
-                session=response.session.access_token if response.session else None
+                {"data": {"nama": nama}}
             )
 
         return {
