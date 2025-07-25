@@ -14,7 +14,7 @@ def fetch_recent_symptoms(user_id: str, session_id: str) -> list[dict]:
         .eq("user_id", user_id) \
         .eq("role", "user") \
         .eq("session_id", session_id) \
-        .order("created_at", desc=True) \
+        .order("created_at") \
         .execute()
 
     return response.data or []
