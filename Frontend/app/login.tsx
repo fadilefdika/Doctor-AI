@@ -34,7 +34,7 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            const response = await axios.post('http://18.142.179.240:8001/auth/login', {
+            const response = await axios.post('https://plants-oem-adjustments-lightweight.trycloudflare.com/auth/login', {
                 email,
                 password,
             });
@@ -57,7 +57,7 @@ export default function LoginPage() {
             } else if (message.toLowerCase().includes('password')) {
                 showModal('Login Failed', 'Incorrect password.');
             } else {
-                showModal('Login Failed', message);
+                showModal('Login Failed', error);
             }
         } finally {
             setLoading(false);

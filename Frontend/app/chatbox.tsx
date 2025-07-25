@@ -54,7 +54,7 @@ const router = useRouter();
 
   const startSession = async () => {
     const res = await axios.post(
-      'http://18.142.179.240:8001/chat/start-session',
+      'https://plants-oem-adjustments-lightweight.trycloudflare.com/chat/start-session',
       {},
       {
         headers: {
@@ -68,7 +68,7 @@ const router = useRouter();
 
   const sendMessages = async (id: string, messages: string[]) => {
     const res = await axios.post(
-      'http://18.142.179.240:8001/chat/send',
+      'https://plants-oem-adjustments-lightweight.trycloudflare.com/chat/send',
       { session_id: id, message: messages.join('\n') },
       {
         headers: {
@@ -122,7 +122,7 @@ const router = useRouter();
 
       setLoading(true);
       const res = await axios.post(
-        'http://18.142.179.240:8001/chat/summary',
+        'https://plants-oem-adjustments-lightweight.trycloudflare.com/chat/summary',
         { session_id: sessionId },
         {
           headers: {

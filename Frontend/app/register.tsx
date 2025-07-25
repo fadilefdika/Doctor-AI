@@ -37,7 +37,7 @@ export default function RegisterPage() {
     try {
       console.log(name,email,password);
       
-      const response = await axios.post('http://18.142.179.240:8001/auth/register', {
+      const response = await axios.post('https://plants-oem-adjustments-lightweight.trycloudflare.com/auth/register', {
         nama: name,
         email,
         password,
