@@ -18,7 +18,7 @@ import Modal from 'react-native-modal';
 export default function HomePage() {
   const [modal, setModal] = useState({ visible: false, title: '', message: '' });
   const [sessions, setSessions] = useState<string[]>([]);
-  const [sidebarVisible, setSidebarVisible] = useState(true);
+  const [sidebarVisible, setSidebarVisible] = useState(false);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -83,8 +83,8 @@ export default function HomePage() {
                 color="#333"
               />
             </TouchableOpacity>
-            <Text style={styles.title}>👋 Welcome</Text>
-            <ChatBox />
+            {/* {sidebarVisible ? <></> : <Text style={styles.title}>👋 Welcome</Text>} */}
+            <ChatBox isSidebar={sidebarVisible} />
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
