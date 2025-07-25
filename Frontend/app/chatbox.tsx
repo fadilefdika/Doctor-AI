@@ -129,7 +129,6 @@ export default function ChatBox({
           },
         }
       );
-      console.log(res.data)
       setSummaryResult(res.data?.summary || 'No summary provided.');
       setShowSummaryModal(true);
     } catch (err: any) {
@@ -141,11 +140,10 @@ export default function ChatBox({
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'position'}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{ flex: 1 }}
-      keyboardVerticalOffset={2}
+      keyboardVerticalOffset={80}
     >
-
       <View style={{ flex: 1 }}>
         <ScrollView
           style={{ flex: 1 }}
@@ -290,7 +288,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowRadius: 6,
     elevation: 4,
-    marginBottom: 10
+    marginBottom: 60
   },
   input: {
     flex: 1,
@@ -298,6 +296,7 @@ const styles = StyleSheet.create({
     color: '#111',
     paddingVertical: 6,
     maxHeight: 100,
+    marginBottom: 4,
   },
   sendButton: {
     marginLeft: 12,
@@ -321,7 +320,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#333',
     textAlign: 'center',
-    // marginBottom: 20,
+    marginBottom: 20,
   },
   closeButton: {
     borderRadius: 10,
