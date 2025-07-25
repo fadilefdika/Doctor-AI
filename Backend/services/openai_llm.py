@@ -1,6 +1,11 @@
 from openai import OpenAI
+from dotenv import load_dotenv
+import os
 
-client = OpenAI(api_key="OPENAI_API_KEY")  # Ganti dengan API key Anda atau gunakan env var
+# Load environment variables from .env file
+load_dotenv()
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))  # ✅ Ini akan berhasil setelah .env diload
 
 def ask_gpt(*messages: dict) -> str:
     print("✅ OpenAI client berhasil dibuat", client)
